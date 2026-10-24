@@ -4,9 +4,9 @@ namespace InventoryManagement.Database
 {
     public class DBContext
     {
-        private static readonly string _connectionString = "InventoyDatabase.json";
+        private static readonly string _connectionString = string.Join("/",Directory.GetCurrentDirectory(),"InventoyDatabase.json" );
 
-        public static List<IProductModel> GetProducts()
+        public static List<ProductModel> GetProducts()
         {
             if (!File.Exists(_connectionString))
             {
@@ -14,10 +14,10 @@ namespace InventoryManagement.Database
             }
 
             var json = File.ReadAllText(_connectionString);
-            return JsonSerializer.Deserialize<List<IProductModel>>(json) ?? [];
+            return JsonSerializer.Deserialize<List<ProductModel>>(json) ?? [];
         }
 
-        public static void SaveProducts(List<IProductModel> products)
+        public static void SaveProducts(List<ProductModel> products)
         {
             var json = JsonSerializer.Serialize(products, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(_connectionString, json);
