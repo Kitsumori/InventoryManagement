@@ -2,7 +2,7 @@ using InventoryManagement.Models;
 using InventoryManagement.Repositories;
 
 namespace InventoryManagement.Services;
-public class ProductService
+public class ProductService : IProductService
 {
     private readonly ProductRepository _productRepository;
 
@@ -11,17 +11,17 @@ public class ProductService
         _productRepository = productRepository;
     }
 
-    public List<ProductModel> GetAllProducts()
+    public List<IProductModel> GetAllProducts()
     {
         return _productRepository.GetAllProducts();
     }
 
-    public ProductModel GetProductByEan(string ean)
+    public IProductModel GetProductByEan(string ean)
     {
         return _productRepository.GetProductByEan(ean) ?? throw new ArgumentException($"Product with ID {ean} not found.");
     }
 
-    public List<ProductModel> GetProductModelsByName(string name)
+    public List<IProductModel> GetProductModelsByName(string name)
     {
         var products = _productRepository.GetProductByName(name);
         if (products.Count == 0)
@@ -31,7 +31,7 @@ public class ProductService
         return products;
     }
 
-    public async Task AddProductAsync(ProductModel product)
+    public async Task AddProductAsync(IProductModel product)
     {
         if (string.IsNullOrWhiteSpace(product.Name))
         {
@@ -56,7 +56,7 @@ public class ProductService
         await _productRepository.AddProductAsync(product);
     }
 
-    public async Task<ProductModel> UpdateProductAsync(ProductModel product)
+    public async Task<IProductModel> UpdateProductAsync(IProductModel product)
     {
         if (string.IsNullOrWhiteSpace(product.Name))
         {

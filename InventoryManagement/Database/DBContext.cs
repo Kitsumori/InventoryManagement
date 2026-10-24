@@ -6,7 +6,7 @@ namespace InventoryManagement.Database
     {
         private static readonly string _connectionString = "InventoyDatabase.json";
 
-        public static List<ProductModel> GetProductModels()
+        public static List<IProductModel> GetProducts()
         {
             if (!File.Exists(_connectionString))
             {
@@ -14,10 +14,10 @@ namespace InventoryManagement.Database
             }
 
             var json = File.ReadAllText(_connectionString);
-            return JsonSerializer.Deserialize<List<ProductModel>>(json) ?? [];
+            return JsonSerializer.Deserialize<List<IProductModel>>(json) ?? [];
         }
 
-        public static void SaveProductModels(List<ProductModel> products)
+        public static void SaveProducts(List<IProductModel> products)
         {
             var json = JsonSerializer.Serialize(products, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(_connectionString, json);

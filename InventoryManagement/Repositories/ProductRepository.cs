@@ -3,29 +3,35 @@ using InventoryManagement.Models;
 namespace InventoryManagement.Repositories;
 public class ProductRepository
 {
-    private List<ProductModel> _products => DBContext.GetProductModels();
+    private List<IProductModel> _products => DBContext.GetProducts();
 
-    public List<ProductModel> GetAllProducts()
+    public List<IProductModel> GetAllProducts()
     {
         return _products;
     }
 
-    public ProductModel? GetProductByEan(string ean)
+    public IProductModel? GetProductByEan(string ean)
     {
         return _products.FirstOrDefault(p => p.Ean == ean);
     }
 
-    public List<ProductModel> GetProductByName(string name)
+    public List<IProductModel> GetProductByName(string name)
     {
         return [.. _products.Where(p => p.Name!.Contains(name, StringComparison.OrdinalIgnoreCase))];
     }
 
-    public async Task AddProductAsync(ProductModel product)
+    public List<IProductModel> GetProductByFilter(Func<IProductModel, bool> filter)
     {
-        _products.Add(product);
+        return [.. _products.Where(filter)];
     }
 
-    public async Task<ProductModel?> UpdateProductAsync(ProductModel product)
+    public async Task AddProductAsync(IProductModel product)
+    {
+        _products.Add(product);
+        DBContext.SaveProducts(_products);
+    }
+
+    public async Task<IProductModel?> UpdateProductAsync(IProductModel product)
     {
         var existingProduct = GetProductByEan(product.Ean!);
         if (existingProduct != null)

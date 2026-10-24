@@ -41,7 +41,7 @@ public class ProductMenus
                     await DeleteProductAsync(productService);
                     break;
                 case "7":
-                    DBContext.SaveProductModels(productService.GetAllProducts());
+                    DBContext.SaveProducts(productService.GetAllProducts());
                     return;
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
@@ -101,6 +101,7 @@ public class ProductMenus
 
         private static async Task AddNewProductAsync(ProductService productService)
         {
+            IProductModel newProduct;
             try
             {
                 Console.Write("Enter EAN: ");
@@ -111,9 +112,46 @@ public class ProductMenus
                 var price = decimal.Parse(Console.ReadLine()!);
                 Console.Write("Enter product quantity: ");
                 var quantity = int.Parse(Console.ReadLine()!);
-
-                var newProduct = new ProductModel(name, price, ean, quantity);
-
+                Console.WriteLine("What is the product type?\n1. Jewlery\n2. Toy\n");
+                var productTypeInput = Console.ReadLine();
+                if (productTypeInput != "1" && productTypeInput != "2")
+                {
+                    throw new ArgumentException("Invalid product type. Please enter 1 for Jewlery or 2 for Toy.");
+                }
+                if (productTypeInput == "1")
+                {
+                    Console.Write("What is the material of the jewelry? ");
+                    var material = Console.ReadLine() ?? throw new ArgumentException("Material cannot be null or empty.");
+                    Console.Write("What is the carat of the jewelry? ");
+                    var carat = Console.ReadLine() ?? throw new ArgumentException("Carat cannot be null or empty.");
+                    newProduct = new JeweleryProductModel(name!, price, ean!, quantity, material, int.Parse(carat));
+                    await productService.AddProductAsync(newProduct);
+                }
+                else if (productTypeInput == "2")
+                {
+                    Console.Write("What is the age group for the toy? ");
+                    var ageGroup = Console.ReadLine() ?? throw new ArgumentException("Age group cannot be null or empty.");
+                    Console.Write("What is battery operated toy?\n1. Yes\n2. No\n");
+                    var isBatteryOperated = Console.ReadLine() ?? throw new ArgumentException("Battery cannot be null or empty.");
+                    if (isBatteryOperated != "1" && isBatteryOperated != "2")
+                    {
+                        throw new ArgumentException("Invalid input for battery operated. Please enter 1 for Yes or 2 for No.");
+                    }
+                    if (isBatteryOperated == "1")
+                    {
+                        isBatteryOperated = "true";
+                    }
+                    else
+                    {
+                        isBatteryOperated = "false";
+                    }
+                    newProduct = new ToyProductModel(name!, price, ean!, quantity, ageGroup, bool.Parse(isBatteryOperated));
+                    await productService.AddProductAsync(newProduct);
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid product type. Please enter 1 for Jewlery or 2 for Toy.");
+                }
                 await productService.AddProductAsync(newProduct);
                 Console.WriteLine("Product added successfully.");
             }
@@ -126,12 +164,12 @@ public class ProductMenus
 
         private static async Task UpdateProductAsync(ProductService productService)
         {
+            IProductModel updatedProduct;
             try
             {
                 Console.Write("Enter EAN of the product to update: ");
                 var ean = Console.ReadLine();
                 var existingProduct = productService.GetProductByEan(ean!);
-
                 Console.Write($"Enter new name (current: {existingProduct.Name}): ");
                 var name = Console.ReadLine();
                 Console.Write($"Enter new price (current: {existingProduct.Price}): ");
@@ -139,7 +177,33 @@ public class ProductMenus
                 Console.Write($"Enter new quantity (current: {existingProduct.Quantity}): ");
                 var quantity = int.Parse(Console.ReadLine()!);
 
-                var updatedProduct = new ProductModel(name, price, ean, quantity);
+                if (existingProduct.GetType() == typeof(JeweleryProductModel))
+                {
+                    var jewelryProduct = (JeweleryProductModel)existingProduct;
+                    Console.Write($"Enter new material (current: {jewelryProduct.Material}): ");
+                    var material = Console.ReadLine();
+                    Console.Write($"Enter new carat (current: {jewelryProduct.Carat}): ");
+                    var carat = int.Parse(Console.ReadLine()!);
+                    jewelryProduct.Material = material!;
+                    jewelryProduct.Carat = carat;
+                    updatedProduct = new JeweleryProductModel(name!, price, ean!, quantity, material!, carat);
+                }
+                else if (existingProduct.GetType() == typeof(ToyProductModel))
+                {
+                    var toyProduct = (ToyProductModel)existingProduct;
+                    Console.Write($"Enter new age group (current: {toyProduct.AgeGroup}): ");
+                    var ageGroup = Console.ReadLine();
+                    Console.Write($"Is the toy battery operated? (current: {toyProduct.IsBatteryOperated}) [true/false]: ");
+                    var isBatteryOperatedInput = Console.ReadLine();
+                    bool isBatteryOperated;
+                    if (!bool.TryParse(isBatteryOperatedInput, out isBatteryOperated))
+                    {
+                        throw new ArgumentException("Invalid input for battery operated. Please enter true or false.");
+                    }
+                    toyProduct.AgeGroup = ageGroup!;
+                    toyProduct.IsBatteryOperated = isBatteryOperated;
+                    updatedProduct = new ToyProductModel(name, price, ean, quantity, ageGroup, isBatteryOperated);
+                }
                 await productService.UpdateProductAsync(updatedProduct);
                 Console.WriteLine("Product updated successfully.");
             }
