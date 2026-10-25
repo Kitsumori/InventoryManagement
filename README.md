@@ -17,7 +17,5 @@ Requisitos mínimos para considerarlo completo:
 - Crear una jerarquía de productos utilizando herencia.
 - Implementar interfaces para definir comportamientos comunes.
 - Mostrar catálogos filtrados con LINQ.
-- Ordenar productos por precio y nombre.
 - Aplicar polimorfismo en la presentación de productos.
 - Implementar operaciones asincrónicas simuladas con async/await.
-- Manejar errores de carga o selección de productos.

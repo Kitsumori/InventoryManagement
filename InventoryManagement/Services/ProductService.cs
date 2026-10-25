@@ -96,7 +96,7 @@ public class ProductService : IProductService
             throw new ArgumentException("Product EAN must be 13 characters long.");
         }
         await Task.Delay(100); // Simulate async work before adding the product
-        return await _productRepository.UpdateProductAsync(product) ?? throw new ArgumentException($"Product with ID {product.Id} not found.");
+        return await _productRepository.UpdateProductAsync(product) ?? throw new ArgumentException($"Product with name {product.Name} not found.");
     }
 
     public async Task<string> DeleteProductAsync(string ean)
